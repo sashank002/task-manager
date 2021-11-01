@@ -21,6 +21,10 @@ app.use(express.json());
 app.use(userRoute); // through this line app can listen route for users
 app.use(taskRoute); // through this line app can listen route for tasks
 
+app.get("/", (req, res) => {
+  res.send("hello sahank is here ");
+});
+
 //
 // *************************  CONNECTING TO SERVER **************************************
 app.listen(port, () => {
