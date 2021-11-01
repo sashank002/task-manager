@@ -5,7 +5,7 @@ const userRoute = require("./routers/userRoute"); // importing route for users
 const taskRoute = require("./routers/taskRoute"); // importing route for task
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
 // *********************** EXPRESS MIDDLEWARE **********************************
 // app.use((req, res, next) => {

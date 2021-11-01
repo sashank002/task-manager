@@ -3,6 +3,8 @@ const User = require("../models/User");
 const Auth = require("../middleware/Auth");
 const multer = require("multer");
 const sharp = require("sharp");
+const { sendWelcomeEmail } = require("../emails/account");
+
 const route = express.Router();
 
 // ************************* FOR ADDING USER **************************************
@@ -11,6 +13,7 @@ route.post("/users", async (req, res) => {
 
   try {
     await user.save();
+    sendWelcomeEmail(user.email, user.name); // for sending welcome email
     const token = await user.generateAuthToken();
     res.status(200).send({ user, token });
   } catch (e) {
