@@ -39,20 +39,22 @@ route.get("/tasks", Auth, async (req, res) => {
     if (req.query.sortBy) {
       const parts = req.query.sortBy.split(":");
       sort[parts[0]] = parts[1] === "desc" ? -1 : 1;
+      // completed : -1 for descending order
+      // completed = 1 for ascending order
     }
 
     // const task = await Tasks.find({ owner: req.user._id });
-    await req.user.populate({
-      path: "tasks",
-      match: match,
-      options: {
-        limit: parseInt(req.query.limit),
-        skip: parseInt(req.query.skip),
-        sort: sort,
-      },
-    }); // this  line will populate task into user.tasks
-    res.send(req.user.tasks);
-    res.send(task);
+    // await req.user.populate({
+    //   path: "tasks",
+    //   match: match,
+    //   options: {
+    //     limit: parseInt(req.query.limit),
+    //     skip: parseInt(req.query.skip),
+    //     sort: sort,
+    //   },
+    // }); // this  line will populate task into user.tasks
+    // res.send(req.user.tasks);
+    // res.send(task);
   } catch (e) {
     res.status(500).send();
   }

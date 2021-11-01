@@ -1,7 +1,8 @@
 const express = require("express");
 const User = require("../models/User");
 const Auth = require("../middleware/Auth");
-
+const multer = require("multer");
+const sharp = require("sharp");
 const route = express.Router();
 
 // ************************* FOR ADDING USER **************************************
@@ -136,6 +137,69 @@ route.patch("/users/me", Auth, async (req, res) => {
     res.send(user);
   } catch (e) {
     res.status(400).send(e);
+  }
+});
+
+// ************************* FOR UPLOADING PHOTO  ********************************
+const upload = multer({
+  // dest: "avatars",              // this will save the file in avatar folder
+  limits: {
+    // for limit the file size
+    fileSize: 1000000,
+  },
+  fileFilter(req, file, cb) {
+    // for accepting the specific file only
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      return cb(new Error("please uplaod only image"));
+    }
+
+    cb(undefined, true);
+  },
+});
+
+route.post(
+  "/users/me/avatar",
+  Auth,
+  upload.single("avatar"),
+  async (req, res) => {
+    const buffer = await sharp(req.file.buffer) // sharp is used for edit image before uplaoding
+      .resize({ width: 250, height: 250 })
+      .png()
+      .toBuffer();
+
+    req.user.avatar = buffer;
+
+    // req.user.avatar = req.file.buffer; // req.file is the file that we uploaded and req.file.buffer is the file in buffer format
+    await req.user.save(); // saving the user with photo added
+    res.send();
+  },
+  (error, req, res, next) => {
+    // this function is useful in sending effective json error messages
+    res.status(400).send({ error: error.message });
+  }
+);
+
+// ************************* FOR DELETING AVATAR  ********************************
+
+route.delete("/users/me/avatar", Auth, async (req, res) => {
+  req.user.avatar = undefined;
+  await req.user.save();
+  res.send("avatar deleted successfully !");
+});
+
+// ************************* FOR ACCESSING AVATAR BY USER ID  ********************************
+route.get("/users/:id/avatar", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user || !user.avatar) {
+      throw new Error("image not found");
+    }
+
+    res.set("Content-Type", "image/jpg"); //settig the header using set method on response
+    res.send(user.avatar);
+  } catch (e) {
+    res.status(500).send();
   }
 });
 
